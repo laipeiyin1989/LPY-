@@ -1,15 +1,165 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Italian Trainer</title><style>body{font-family:Arial;padding:20px}button,input,select{font-size:18px;margin:6px;padding:8px}#word{font-size:32px;font-weight:bold;margin:20px 0}</style></head><body><h2>Italian Trainer</h2>
-<input type=file id=file accept=.csv><button onclick="imp()">Import Vocabulary</button><br>
-<select id=cat></select><div id=word></div><input id=ans placeholder='Answer'><br>
-<button onclick='check()'>Check Answer</button><button onclick='hint()'>Hint</button><button onclick='nextW()'>Next</button><p id=msg></p>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Italian Trainer V1</title>
+
+<style>
+body { font-family: Arial; padding: 20px; }
+button, input, select { font-size: 18px; margin: 6px; padding: 8px; }
+#english { font-size: 28px; font-weight: bold; margin: 15px 0; }
+#italian { font-size: 26px; margin: 10px 0; }
+</style>
+</head>
+
+<body>
+
+<h2>Italian Trainer V1</h2>
+
+<input type="file" id="file" accept=".csv">
+<button onclick="imp()">Import Vocabulary</button>
+
+<br>
+
+<select id="cat"></select>
+
+<div id="english"></div>
+<div id="italian"></div>
+
+<input id="ans" placeholder="Type Italian answer here">
+
+<br>
+
+<button onclick="check()">Check Answer</button>
+<button onclick="hint()">Hint</button>
+<button onclick="nextW()">Next</button>
+
+<p id="msg"></p>
+
 <script>
-let data=JSON.parse(localStorage.getItem('vocab')||'[]'),cur;
-function save(){localStorage.setItem('vocab',JSON.stringify(data));loadCats();}
-function imp(){let f=file.files[0];if(!f)return;let r=new FileReader();r.onload=e=>{let l=e.target.result.trim().split(/\r?\n/).slice(1);data=l.map(x=>{let a=x.split(',');return{c:a[0],i:a[1],e:a[2]}});save();nextW();};r.readAsText(f);}
-function loadCats(){let s=cat;s.innerHTML='<option>All</option>';[...new Set(data.map(x=>x.c))].forEach(c=>s.innerHTML+=`<option>${c}</option>`);}
-function mask(t){return t.replace(/[A-Za-zÀ-ÿ]/g,(m,i)=>Math.random()<0.45?'_':m);}
-function nextW(){let arr=data.filter(x=>cat.value=='All'||x.c==cat.value);if(!arr.length){word.textContent='Import vocab';return;}cur=arr[Math.floor(Math.random()*arr.length)];word.textContent=mask(cur.i);msg.textContent='';ans.value='';}
-function check(){let a=ans.value.trim().toLowerCase();let ok=cur.e.toLowerCase().split('|').includes(a);msg.textContent=ok?'Correct!':'Answer: '+cur.e;}
-function hint(){word.textContent=cur.i;}
-cat.onchange=nextW;loadCats();nextW();
-</script></body></html>
+
+let data = JSON.parse(localStorage.getItem('vocab') || '[]');
+let cur = null;
+
+// hint system state
+let revealCount = 2;
+let baseWord = "";
+let article = "";
+
+function save() {
+    localStorage.setItem('vocab', JSON.stringify(data));
+    loadCats();
+}
+
+function imp() {
+    let f = file.files[0];
+    if (!f) return;
+
+    let r = new FileReader();
+
+    r.onload = e => {
+        let lines = e.target.result.trim().split(/\r?\n/).slice(1);
+
+        data = lines.map(x => {
+            let a = x.split(',');
+            return { c: a[0], i: a[1], e: a[2] };
+        });
+
+        save();
+        nextW();
+    };
+
+    r.readAsText(f);
+}
+
+function loadCats() {
+    let s = cat;
+    s.innerHTML = '<option>All</option>';
+
+    [...new Set(data.map(x => x.c))].forEach(c => {
+        s.innerHTML += `<option>${c}</option>`;
+    });
+}
+
+// normalize for comparison
+function norm(s) {
+    return s.toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+// split article + word
+function splitItalian(text) {
+    let parts = text.trim().split(' ');
+    if (parts.length === 1) return ["", parts[0]];
+    return [parts[0], parts.slice(1).join(' ')];
+}
+
+// build hint string
+function buildHint(word, count) {
+    let revealed = Math.min(count, word.length);
+
+    let visible = word.slice(0, revealed);
+    let hidden = "_".repeat(word.length - revealed);
+
+    return visible + hidden;
+}
+
+function nextW() {
+    let arr = data.filter(x => cat.value == 'All' || x.c == cat.value);
+
+    if (!arr.length) {
+        english.textContent = "Import vocab first";
+        italian.textContent = "";
+        return;
+    }
+
+    cur = arr[Math.floor(Math.random() * arr.length)];
+
+    // reset hint state
+    revealCount = 2;
+
+    let split = splitItalian(cur.i);
+    article = split[0];
+    baseWord = split[1];
+
+    english.textContent = cur.e;
+
+    italian.textContent =
+        (article ? article + " " : "") +
+        buildHint(baseWord, revealCount);
+
+    msg.textContent = "";
+    ans.value = "";
+}
+
+function hint() {
+    revealCount++;
+
+    italian.textContent =
+        (article ? article + " " : "") +
+        buildHint(baseWord, revealCount);
+}
+
+function check() {
+    let a = norm(ans.value);
+
+    let ok = cur.e
+        .split('|')
+        .map(norm)
+        .includes(a);
+
+    if (ok) {
+        msg.textContent = "✅ Correct!\n" + cur.i;
+    } else {
+        msg.textContent = "❌ Incorrect\nCorrect answer: " + cur.i;
+    }
+}
+
+cat.onchange = nextW;
+loadCats();
+nextW();
+
+</script>
+
+</body>
+</html>
