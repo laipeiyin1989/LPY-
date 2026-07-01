@@ -141,18 +141,17 @@ function hint() {
 }
 
 function check() {
+
     let a = norm(ans.value);
 
-    let ok = cur.e
-        .split('|')
-        .map(norm)
-        .includes(a);
+    let ok = a === norm(cur.i);
 
     if (ok) {
-        msg.textContent = "✅ Correct!\n" + cur.i;
+        msg.textContent = "✅ Correct!\n\n" + cur.i;
     } else {
-        msg.textContent = "❌ Incorrect\nCorrect answer: " + cur.i;
+        msg.textContent = "❌ Incorrect\n\nCorrect answer:\n" + cur.i;
     }
+
 }
 
 cat.onchange = nextW;
