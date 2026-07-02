@@ -500,11 +500,20 @@
     if(state.currentIndex === null) return;
     var idx = state.currentIndex;
     var w = state.words[idx];
-    if(correct === true){ w.box = Math.min(w.box + 1, MASTER_BOX); }
-    else if(correct === false){ w.box = 0; }
-    var gap = GAPS[Math.min(w.box, GAPS.length - 1)];
-    var insertPos = Math.min(gap, state.order.length);
-    state.order.splice(insertPos, 0, idx);
+    
+    if(correct === true){ 
+      // If correct, move it up a box and space it out normally
+      w.box = Math.min(w.box + 1, MASTER_BOX); 
+      var gap = GAPS[Math.min(w.box, GAPS.length - 1)];
+      var insertPos = Math.min(gap, state.order.length);
+      state.order.splice(insertPos, 0, idx);
+    } 
+    else if(correct === false || correct === null){ 
+      // If wrong (or skipped), drop its box status back to 0 
+      // and push it to the absolute END of the current pile
+      w.box = 0;
+      state.order.push(idx);
+    }
   }
 
   function nextWord(){
@@ -513,9 +522,14 @@
     }
     state.scheduledThisTurn = false;
 
+    // If the pile is empty, it means you successfully cleared everything!
+    // Time to restart with a completely fresh shuffle of the whole deck.
     if(state.order.length === 0){
       state.order = shuffledIndices(state.words.length);
+      // Optional: Reset seenCount if you want the card counter to start over
+      seenCount = 0; 
     }
+    
     state.currentIndex = state.order.shift();
     seenCount++;
 
