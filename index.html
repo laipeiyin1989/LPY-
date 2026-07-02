@@ -496,25 +496,27 @@
   // correct === true  -> box goes up, comes back much later
   // correct === false -> box resets to 0, comes back soon
   // correct === null  -> skipped without answering, box unchanged
-  function scheduleCurrent(correct){
-    if(state.currentIndex === null) return;
-    var idx = state.currentIndex;
-    var w = state.words[idx];
+  // Reinsert the current word into the queue, spaced out by its box level.
+// correct === true  -> box goes up, comes back much later
+// correct === false -> box resets to 0, comes back soon
+// correct === null  -> skipped without answering, box unchanged
+function scheduleCurrent(correct){
+  if(state.currentIndex === null) return;
+  var idx = state.currentIndex;
+  var w = state.words[idx];
+  
+  if(correct === true){
+    // If correct, move it up a box (keeping box stats if you want them)
+    w.box = Math.min(w.box + 1, MASTER_BOX);
     
-    if(correct === true){ 
-      // If correct, move it up a box and space it out normally
-      w.box = Math.min(w.box + 1, MASTER_BOX); 
-      var gap = GAPS[Math.min(w.box, GAPS.length - 1)];
-      var insertPos = Math.min(gap, state.order.length);
-      state.order.splice(insertPos, 0, idx);
-    } 
-    else if(correct === false || correct === null){ 
-      // If wrong (or skipped), drop its box status back to 0 
-      // and push it to the absolute END of the current pile
-      w.box = 0;
-      state.order.push(idx);
-    }
+    // REMOVED: state.order.splice(insertPos, 0, idx);
+  } else if(correct === false || correct === null){
+    // If wrong (or skipped), drop its box status back to 0
+    w.box = 0;
+    
+    // REMOVED: state.order.push(idx);
   }
+}
 
   function nextWord(){
     if(!state.scheduledThisTurn){
