@@ -106,30 +106,23 @@
   }
   .reload-btn:active{background:var(--leaf-dark);}
 
-  /* mode toggles */
-  .toggle-row{
-    display:flex;
-    gap:10px;
-    margin-bottom:18px;
-  }
-  .toggle-chip{
-    flex:1 1 0;
+  /* mode select screen */
+  .mode-select{display:none;}
+  .mode-select.show{display:block;}
+  .mode-select .label{
     text-align:center;
     font-size:16px;
-    font-weight:700;
-    padding:9px 6px;
-    color:var(--ink-soft);
-    background:var(--paper);
-    border:3px solid var(--wood);
-    cursor:pointer;
-    user-select:none;
-    line-height:1.25;
-    clip-path: polygon(0 6px, 6px 6px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px));
+    margin-bottom:14px;
   }
-  .toggle-chip.on{
-    background:var(--leaf);
-    border-color:var(--leaf-dark);
-    color:#fff;
+  .mode-select .label::before{content:"";}
+  .mode-btn{
+    font-family:'VT323', monospace;
+    text-align:center;
+    line-height:1.5;
+  }
+  .mode-sub{
+    font-size:14px;
+    opacity:0.85;
   }
 
   .status-msg{
@@ -158,6 +151,27 @@
 
   .quiz-body{display:none;}
   .quiz-body.show{display:block;}
+
+  .quiz-top-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+    gap:10px;
+  }
+  .quiz-top-row .progress{margin-bottom:0; text-align:left;}
+  .change-mode-btn{
+    font-family:'VT323', monospace;
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink-soft);
+    background:var(--paper);
+    border:2px solid var(--wood);
+    padding:6px 10px;
+    cursor:pointer;
+    white-space:nowrap;
+    clip-path: polygon(0 5px, 5px 5px, 5px 0, calc(100% - 5px) 0, calc(100% - 5px) 5px, 100% 5px, 100% calc(100% - 5px), calc(100% - 5px) calc(100% - 5px), calc(100% - 5px) 100%, 5px 100%, 5px calc(100% - 5px), 0 calc(100% - 5px));
+  }
 
   .progress{
     font-size:18px;
@@ -260,16 +274,21 @@
     <button class="reload-btn" id="reloadBtn">🔄 Reload List</button>
   </div>
 
-  <div class="toggle-row">
-    <div class="toggle-chip" id="reverseToggle">Reverse<br>(IT → EN)</div>
-    <div class="toggle-chip" id="blindToggle">Blind<br>(no starting letters)</div>
-  </div>
-
   <div class="error-msg" id="errorMsg"></div>
   <div class="status-msg" id="statusMsg">Loading your list...</div>
 
+  <div class="mode-select" id="modeSelect">
+    <div class="label" id="modeSelectLabel">Choose a mode</div>
+    <button class="btn mode-btn" id="modeNormalBtn">🌱 Normal<br><span class="mode-sub">English → Italian</span></button>
+    <button class="btn mode-btn" id="modeReverseBtn">🔄 Reverse<br><span class="mode-sub">Italian → English</span></button>
+    <button class="btn mode-btn" id="modeBlindBtn">🙈 Blind<br><span class="mode-sub">No starting letters</span></button>
+  </div>
+
   <div class="quiz-body" id="quizBody">
-    <div class="progress" id="progress">0 / 0</div>
+    <div class="quiz-top-row">
+      <div class="progress" id="progress">0 / 0</div>
+      <button class="change-mode-btn" id="changeModeBtn">Change Mode</button>
+    </div>
 
     <div class="prompt-block">
       <div class="label" id="promptLabel">English</div>
@@ -335,10 +354,13 @@
 
   var errorMsg = document.getElementById('errorMsg');
   var statusMsg = document.getElementById('statusMsg');
+  var modeSelect = document.getElementById('modeSelect');
   var quizBody = document.getElementById('quizBody');
   var reloadBtn = document.getElementById('reloadBtn');
-  var reverseToggle = document.getElementById('reverseToggle');
-  var blindToggle = document.getElementById('blindToggle');
+  var modeNormalBtn = document.getElementById('modeNormalBtn');
+  var modeReverseBtn = document.getElementById('modeReverseBtn');
+  var modeBlindBtn = document.getElementById('modeBlindBtn');
+  var changeModeBtn = document.getElementById('changeModeBtn');
 
   var progressEl = document.getElementById('progress');
   var promptLabel = document.getElementById('promptLabel');
@@ -358,6 +380,7 @@
   function loadFromSheet(){
     hideError();
     quizBody.classList.remove('show');
+    modeSelect.classList.remove('show');
     statusMsg.classList.remove('hidden');
 
     if(!SHEET_CSV_URL || SHEET_CSV_URL.indexOf('PASTE_YOUR') !== -1){
@@ -384,7 +407,7 @@
         }
         state.words = words;
         statusMsg.classList.add('hidden');
-        startSession();
+        modeSelect.classList.add('show');
       })
       .catch(function(err){
         showError("Could not load the sheet. Make sure it's published to the web as CSV and the link is correct.");
@@ -402,16 +425,20 @@
     errorMsg.classList.remove('show');
   }
 
-  // ---------- Mode toggles ----------
-  reverseToggle.addEventListener('click', function(){
-    settings.reverse = !settings.reverse;
-    reverseToggle.classList.toggle('on', settings.reverse);
-    reinitCurrentWord();
-  });
-  blindToggle.addEventListener('click', function(){
-    settings.blind = !settings.blind;
-    blindToggle.classList.toggle('on', settings.blind);
-    reinitCurrentWord();
+  // ---------- Mode selection screen ----------
+  function chooseMode(reverse, blind){
+    settings.reverse = reverse;
+    settings.blind = blind;
+    modeSelect.classList.remove('show');
+    startSession();
+  }
+  modeNormalBtn.addEventListener('click', function(){ chooseMode(false, false); });
+  modeReverseBtn.addEventListener('click', function(){ chooseMode(true, false); });
+  modeBlindBtn.addEventListener('click', function(){ chooseMode(false, true); });
+
+  changeModeBtn.addEventListener('click', function(){
+    quizBody.classList.remove('show');
+    modeSelect.classList.add('show');
   });
 
   // ---------- Delimiter detection ----------
@@ -750,7 +777,7 @@
 
   loadFromSheet();
 
-})();
+})(); or
 </script>
 </body>
 </html>
