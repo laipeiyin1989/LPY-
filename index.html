@@ -4,77 +4,107 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Italian Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#1c2230;
-    --ink-soft:#6b7280;
-    --paper:#eef0f4;
-    --card:#ffffff;
-    --line:#e2e5ec;
-    --blue:#2f6fed;
-    --blue-dark:#2557c4;
-    --good:#1f8a55;
-    --good-bg:#e8f6ee;
-    --bad:#c23b3b;
-    --bad-bg:#fbeaea;
-    --radius:20px;
+    --ink:#4a3423;
+    --ink-soft:#8a6d4f;
+    --paper:#fdf3d9;
+    --card:#fffaea;
+    --wood:#8a5a34;
+    --wood-dark:#5c3a1e;
+    --leaf:#7cb342;
+    --leaf-dark:#558b2f;
+    --sky:#bfe3f0;
+    --good:#3f7d3a;
+    --good-bg:#e3f3d8;
+    --bad:#b5482f;
+    --bad-bg:#fbe3da;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
   body{
     margin:0;
-    background:var(--paper);
+    background:
+      radial-gradient(circle at 20% 15%, #e7f5c9 0%, transparent 45%),
+      radial-gradient(circle at 85% 80%, #cdeab3 0%, transparent 40%),
+      var(--sky);
     color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-family:'VT323', ui-monospace, monospace;
     display:flex;
     align-items:center;
     justify-content:center;
     min-height:100vh;
     padding:20px;
   }
-  .card{
-    background:var(--card);
-    border-radius:var(--radius);
-    box-shadow:0 1px 3px rgba(20,25,40,0.08), 0 12px 32px rgba(20,25,40,0.06);
+
+  .frame{
+    background:var(--wood-dark);
+    padding:8px;
     width:100%;
     max-width:460px;
-    padding:28px 26px 26px;
+    clip-path: polygon(
+      0 14px, 14px 14px, 14px 0,
+      calc(100% - 14px) 0, calc(100% - 14px) 14px, 100% 14px,
+      100% calc(100% - 14px), calc(100% - 14px) calc(100% - 14px), calc(100% - 14px) 100%,
+      14px 100%, 14px calc(100% - 14px), 0 calc(100% - 14px)
+    );
   }
-  h1{
-    font-size:32px;
-    font-weight:800;
-    text-align:center;
-    margin:4px 0 20px;
+  .card{
+    background:var(--wood);
+    padding:6px;
+    clip-path: polygon(
+      0 12px, 12px 12px, 12px 0,
+      calc(100% - 12px) 0, calc(100% - 12px) 12px, 100% 12px,
+      100% calc(100% - 12px), calc(100% - 12px) calc(100% - 12px), calc(100% - 12px) 100%,
+      12px 100%, 12px calc(100% - 12px), 0 calc(100% - 12px)
+    );
+  }
+  .inner{
+    background:var(--card);
+    padding:26px 22px 22px;
+    clip-path: polygon(
+      0 10px, 10px 10px, 10px 0,
+      calc(100% - 10px) 0, calc(100% - 10px) 10px, 100% 10px,
+      100% calc(100% - 10px), calc(100% - 10px) calc(100% - 10px), calc(100% - 10px) 100%,
+      10px 100%, 10px calc(100% - 10px), 0 calc(100% - 10px)
+    );
   }
 
-  /* file row */
-  .file-row{
+  h1{
+    font-family:'Press Start 2P', 'VT323', monospace;
+    font-size:22px;
+    line-height:1.6;
+    text-align:center;
+    color:var(--ink);
+    margin:2px 0 2px;
+  }
+  .subtitle{
+    text-align:center;
+    font-size:17px;
+    color:var(--ink-soft);
+    margin:0 0 16px;
+  }
+
+  .reload-row{
     display:flex;
-    align-items:center;
-    gap:10px;
+    justify-content:center;
     margin-bottom:14px;
   }
-  .file-btn{
-    flex:0 0 auto;
-    background:var(--paper);
-    color:var(--ink);
-    font-weight:600;
-    font-size:15px;
-    padding:10px 16px;
-    border-radius:10px;
+  .reload-btn{
+    font-family:'VT323', monospace;
+    font-size:17px;
+    font-weight:700;
+    color:#fff;
+    background:var(--leaf);
+    border:3px solid var(--leaf-dark);
+    padding:8px 18px;
     cursor:pointer;
-    border:1px solid var(--line);
-    white-space:nowrap;
+    clip-path: polygon(0 6px, 6px 6px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px));
   }
-  .file-name{
-    flex:1 1 auto;
-    font-size:14px;
-    color:var(--ink-soft);
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-  }
-  input[type="file"]{display:none;}
+  .reload-btn:active{background:var(--leaf-dark);}
 
   /* mode toggles */
   .toggle-row{
@@ -85,143 +115,149 @@
   .toggle-chip{
     flex:1 1 0;
     text-align:center;
-    font-size:13px;
+    font-size:16px;
     font-weight:700;
-    padding:10px 8px;
-    border-radius:12px;
-    border:2px solid var(--line);
-    background:var(--paper);
+    padding:9px 6px;
     color:var(--ink-soft);
+    background:var(--paper);
+    border:3px solid var(--wood);
     cursor:pointer;
     user-select:none;
-    line-height:1.3;
+    line-height:1.25;
+    clip-path: polygon(0 6px, 6px 6px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px));
   }
   .toggle-chip.on{
-    background:var(--blue);
-    border-color:var(--blue);
+    background:var(--leaf);
+    border-color:var(--leaf-dark);
     color:#fff;
   }
 
+  .status-msg{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:18px;
+    padding:26px 8px;
+    line-height:1.5;
+  }
+  .status-msg code{
+    background:var(--paper);
+    padding:2px 6px;
+    border:2px solid var(--wood);
+  }
   .error-msg{
     background:var(--bad-bg);
     color:var(--bad);
-    border-radius:12px;
-    padding:12px 14px;
-    font-size:14px;
-    margin-bottom:16px;
+    border:2px solid var(--bad);
+    padding:10px 12px;
+    font-size:16px;
+    margin-bottom:14px;
     display:none;
+    text-align:center;
   }
   .error-msg.show{display:block;}
-
-  .empty-hint{
-    text-align:center;
-    color:var(--ink-soft);
-    font-size:15px;
-    padding:30px 10px;
-  }
 
   .quiz-body{display:none;}
   .quiz-body.show{display:block;}
 
   .progress{
-    font-size:15px;
-    font-weight:600;
+    font-size:18px;
+    font-weight:700;
     color:var(--ink-soft);
-    letter-spacing:0.02em;
-    margin-bottom:20px;
+    margin-bottom:18px;
     text-align:center;
   }
   .label{
-    font-size:12px;
+    font-size:14px;
     font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:0.08em;
-    color:var(--ink-soft);
-    margin-bottom:6px;
+    letter-spacing:0.06em;
+    color:var(--leaf-dark);
+    margin-bottom:4px;
     text-align:center;
   }
-  .prompt-block{margin-bottom:20px; text-align:center;}
+  .label::before{content:"🌿 ";}
+  .prompt-block{margin-bottom:18px; text-align:center;}
   .english-word{
-    font-size:26px;
+    font-size:28px;
     font-weight:700;
     line-height:1.25;
     color:var(--ink);
   }
-  .italian-block{margin-bottom:20px; text-align:center;}
+  .italian-block{margin-bottom:18px; text-align:center;}
   .article{
-    font-size:17px;
-    font-weight:600;
+    font-size:19px;
+    font-weight:700;
     color:var(--ink-soft);
     margin-bottom:2px;
   }
   .masked-word{
-    font-size:32px;
+    font-size:34px;
     font-weight:700;
-    letter-spacing:0.05em;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing:0.06em;
     color:var(--ink);
     word-break:break-word;
   }
   input[type="text"]{
     width:100%;
-    font-size:19px;
-    padding:16px 16px;
-    border-radius:14px;
-    border:2px solid var(--line);
+    font-family:'VT323', monospace;
+    font-size:22px;
+    padding:14px 14px;
+    border:3px solid var(--wood);
     background:var(--paper);
     color:var(--ink);
     margin-bottom:14px;
     outline:none;
     text-align:center;
+    clip-path: polygon(0 6px, 6px 6px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px));
   }
-  input[type="text"]:focus{border-color:var(--blue);}
+  input[type="text"]:focus{border-color:var(--leaf-dark);}
   .btn{
     width:100%;
     display:block;
-    font-size:18px;
+    font-family:'VT323', monospace;
+    font-size:22px;
     font-weight:700;
-    padding:15px 18px;
-    border-radius:14px;
-    border:none;
+    padding:13px 18px;
+    border:3px solid var(--leaf-dark);
     margin-bottom:12px;
     cursor:pointer;
     color:#fff;
-    background:var(--blue);
+    background:var(--leaf);
+    clip-path: polygon(0 6px, 6px 6px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px));
   }
-  .btn:active{background:var(--blue-dark);}
+  .btn:active{background:var(--leaf-dark);}
   .btn-row{display:flex; gap:12px;}
   .btn-row .btn{margin-bottom:0;}
   .feedback{
-    border-radius:14px;
-    padding:14px 16px;
+    border:3px solid var(--good);
+    padding:12px 14px;
     margin-bottom:14px;
-    font-size:18px;
+    font-size:20px;
     font-weight:700;
     text-align:center;
     display:none;
+    clip-path: polygon(0 6px, 6px 6px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px));
   }
   .feedback.show{display:block;}
-  .feedback.correct{background:var(--good-bg); color:var(--good);}
-  .feedback.incorrect{background:var(--bad-bg); color:var(--bad);}
+  .feedback.correct{background:var(--good-bg); color:var(--good); border-color:var(--good);}
+  .feedback.incorrect{background:var(--bad-bg); color:var(--bad); border-color:var(--bad);}
   .feedback .answer{
     display:block;
     margin-top:4px;
-    font-size:20px;
+    font-size:22px;
     font-weight:700;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
   .hidden{display:none !important;}
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h1>BENVENUTI</h1>
+<div class="frame"><div class="card"><div class="inner">
 
-  <div class="file-row">
-    <label class="file-btn" for="csvInput">Choose File</label>
-    <span class="file-name" id="fileName">No file chosen</span>
-    <input type="file" id="csvInput" accept=".csv,.txt,text/csv,text/plain">
+  <h1>BENVENUTI</h1>
+  <div class="subtitle">🌻 grow your vocabulary, one word at a time 🌻</div>
+
+  <div class="reload-row">
+    <button class="reload-btn" id="reloadBtn">🔄 Reload List</button>
   </div>
 
   <div class="toggle-row">
@@ -230,7 +266,7 @@
   </div>
 
   <div class="error-msg" id="errorMsg"></div>
-  <div class="empty-hint" id="emptyHint">Load a Quizlet export above to start practicing (Term/Front → Italian, Definition/Back → English).</div>
+  <div class="status-msg" id="statusMsg">Loading your list...</div>
 
   <div class="quiz-body" id="quizBody">
     <div class="progress" id="progress">0 / 0</div>
@@ -259,17 +295,27 @@
       <button class="btn" id="nextBtn">Next</button>
     </div>
   </div>
-</div>
+
+</div></div></div>
 
 <script>
 (function(){
   "use strict";
 
+  // =========================================================================
+  // PASTE YOUR GOOGLE SHEET CSV LINK HERE
+  // How to get it: In Google Sheets, go to File > Share > Publish to web,
+  // choose the correct sheet/tab, set format to "Comma-separated values (.csv)",
+  // click Publish, then copy the link it gives you and paste it below.
+  // =========================================================================
+  var SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZbU5WJpoFAVCv_W2dY0KlGORct6tg90tDX2u6E209x4NK4r5LgGwZVESsfQzaWASWBopYKiE6kY6k/pub?gid=1667081684&single=true&output=csv";
+  // =========================================================================
+
   var ARTICLES = ["il","lo","la","i","gli","le","un","uno","una"];
   var LETTER_RE = /[a-zA-Zàèéìòùáéíóúü]/;
   // Leitner-style boxes: how many cards ahead a word gets requeued.
   // Box 0 = just missed, comes back soon. Box 4 = mastered, comes back much later.
-  var GAPS = [2, 4, 8, 14, 24];
+  var GAPS = [4, 8, 15, 25, 40];
   var MASTER_BOX = GAPS.length - 1;
 
   var settings = {
@@ -287,11 +333,10 @@
   };
   var seenCount = 0;
 
-  var fileName = document.getElementById('fileName');
   var errorMsg = document.getElementById('errorMsg');
-  var emptyHint = document.getElementById('emptyHint');
-  var csvInput = document.getElementById('csvInput');
+  var statusMsg = document.getElementById('statusMsg');
   var quizBody = document.getElementById('quizBody');
+  var reloadBtn = document.getElementById('reloadBtn');
   var reverseToggle = document.getElementById('reverseToggle');
   var blindToggle = document.getElementById('blindToggle');
 
@@ -309,34 +354,45 @@
   var hintBtn = document.getElementById('hintBtn');
   var nextBtn = document.getElementById('nextBtn');
 
-  // ---------- File loading ----------
-  csvInput.addEventListener('change', function(e){
-    var file = e.target.files && e.target.files[0];
-    if(!file) return;
-    fileName.textContent = file.name;
+  // ---------- Loading from Google Sheet ----------
+  function loadFromSheet(){
     hideError();
-    var reader = new FileReader();
-    reader.onload = function(evt){
-      try{
-        var text = evt.target.result;
+    quizBody.classList.remove('show');
+    statusMsg.classList.remove('hidden');
+
+    if(!SHEET_CSV_URL || SHEET_CSV_URL.indexOf('PASTE_YOUR') !== -1){
+      statusMsg.innerHTML = 'Add your Google Sheet CSV link to <code>SHEET_CSV_URL</code> near the top of the &lt;script&gt; tag, then reload the page.';
+      return;
+    }
+
+    statusMsg.textContent = 'Loading your list...';
+    var bustUrl = SHEET_CSV_URL + (SHEET_CSV_URL.indexOf('?') === -1 ? '?' : '&') + '_ts=' + Date.now();
+
+    fetch(bustUrl)
+      .then(function(res){
+        if(!res.ok) throw new Error('Request failed with status ' + res.status);
+        return res.text();
+      })
+      .then(function(text){
         var delimiter = detectDelimiter(text);
         var rows = parseDelimited(text, delimiter);
         var words = buildWordList(rows);
         if(words.length === 0){
-          showError("No usable rows found. Check that the file has a Term/Front column and a Definition/Back column.");
+          showError("Connected, but found no usable rows. Check the sheet has a Term/Front column and a Definition/Back column.");
+          statusMsg.textContent = '';
           return;
         }
         state.words = words;
+        statusMsg.classList.add('hidden');
         startSession();
-      }catch(err){
-        showError("Could not read that file.");
-      }
-    };
-    reader.onerror = function(){
-      showError("Could not read that file.");
-    };
-    reader.readAsText(file, 'UTF-8');
-  });
+      })
+      .catch(function(err){
+        showError("Could not load the sheet. Make sure it's published to the web as CSV and the link is correct.");
+        statusMsg.textContent = '';
+      });
+  }
+
+  reloadBtn.addEventListener('click', loadFromSheet);
 
   function showError(msg){
     errorMsg.textContent = msg;
@@ -474,7 +530,6 @@
 
   // ---------- Session ----------
   function startSession(){
-    emptyHint.classList.add('hidden');
     quizBody.classList.add('show');
     seenCount = 0;
     state.order = shuffledIndices(state.words.length);
@@ -496,27 +551,19 @@
   // correct === true  -> box goes up, comes back much later
   // correct === false -> box resets to 0, comes back soon
   // correct === null  -> skipped without answering, box unchanged
-  // Reinsert the current word into the queue, spaced out by its box level.
-// correct === true  -> box goes up, comes back much later
-// correct === false -> box resets to 0, comes back soon
-// correct === null  -> skipped without answering, box unchanged
-function scheduleCurrent(correct){
-  if(state.currentIndex === null) return;
-  var idx = state.currentIndex;
-  var w = state.words[idx];
-  
-  if(correct === true){
-    // If correct, move it up a box (keeping box stats if you want them)
-    w.box = Math.min(w.box + 1, MASTER_BOX);
-    
-    // REMOVED: state.order.splice(insertPos, 0, idx);
-  } else if(correct === false || correct === null){
-    // If wrong (or skipped), drop its box status back to 0
-    w.box = 0;
-    
-    // REMOVED: state.order.push(idx);
+  function scheduleCurrent(correct){
+    if(state.currentIndex === null) return;
+    var idx = state.currentIndex;
+    var w = state.words[idx];
+    if(correct === true){ w.box = Math.min(w.box + 1, MASTER_BOX); }
+    else if(correct === false){ w.box = 0; }
+    var baseGap = GAPS[Math.min(w.box, GAPS.length - 1)];
+    // Jitter the gap by up to +/-30% so repeats don't land on a predictable rhythm.
+    var jitter = Math.round(baseGap * (Math.random() * 0.6 - 0.3));
+    var gap = Math.max(2, baseGap + jitter);
+    var insertPos = Math.min(gap, state.order.length);
+    state.order.splice(insertPos, 0, idx);
   }
-}
 
   function nextWord(){
     if(!state.scheduledThisTurn){
@@ -524,14 +571,9 @@ function scheduleCurrent(correct){
     }
     state.scheduledThisTurn = false;
 
-    // If the pile is empty, it means you successfully cleared everything!
-    // Time to restart with a completely fresh shuffle of the whole deck.
     if(state.order.length === 0){
       state.order = shuffledIndices(state.words.length);
-      // Optional: Reset seenCount if you want the card counter to start over
-      seenCount = 0; 
     }
-    
     state.currentIndex = state.order.shift();
     seenCount++;
 
@@ -574,7 +616,6 @@ function scheduleCurrent(correct){
     }
   }
 
-  // Re-mask the current word under new settings without touching scheduling/stats.
   function reinitCurrentWord(){
     if(state.currentIndex === null) return;
     setupRevealForCurrentWord();
@@ -670,17 +711,16 @@ function scheduleCurrent(correct){
     maskedWordEl.textContent = maskString(currentTargetString(w), state.revealed);
 
     feedback.classList.add('show');
+    feedbackAnswer.textContent = displayAnswer;
+    feedbackAnswer.classList.remove('hidden');
     if(isCorrect){
       feedback.classList.add('correct');
       feedback.classList.remove('incorrect');
       feedbackTitle.textContent = '✅ Correct';
-      feedbackAnswer.classList.add('hidden');
     } else {
       feedback.classList.add('incorrect');
       feedback.classList.remove('correct');
       feedbackTitle.textContent = '❌ Correct answer';
-      feedbackAnswer.textContent = displayAnswer;
-      feedbackAnswer.classList.remove('hidden');
     }
   }
 
@@ -707,6 +747,8 @@ function scheduleCurrent(correct){
       else nextWord();
     }
   });
+
+  loadFromSheet();
 
 })();
 </script>
