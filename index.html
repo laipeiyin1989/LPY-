@@ -241,25 +241,63 @@
   .btn:active{background:var(--leaf-dark);}
   .btn-row{display:flex; gap:12px;}
   .btn-row .btn{margin-bottom:0;}
-  .feedback{
-    border:3px solid var(--good);
-    padding:12px 14px;
-    margin-bottom:14px;
-    font-size:20px;
-    font-weight:700;
-    text-align:center;
+
+  .modal-overlay{
     display:none;
-    clip-path: polygon(0 6px, 6px 6px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px));
+    position:fixed;
+    inset:0;
+    background:rgba(74,52,35,0.55);
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:50;
   }
-  .feedback.show{display:block;}
-  .feedback.correct{background:var(--good-bg); color:var(--good); border-color:var(--good);}
-  .feedback.incorrect{background:var(--bad-bg); color:var(--bad); border-color:var(--bad);}
-  .feedback .answer{
-    display:block;
-    margin-top:4px;
+  .modal-overlay.show{display:flex;}
+  .modal-frame{
+    background:var(--wood-dark);
+    padding:8px;
+    width:100%;
+    max-width:360px;
+    clip-path: polygon(
+      0 14px, 14px 14px, 14px 0,
+      calc(100% - 14px) 0, calc(100% - 14px) 14px, 100% 14px,
+      100% calc(100% - 14px), calc(100% - 14px) calc(100% - 14px), calc(100% - 14px) 100%,
+      14px 100%, 14px calc(100% - 14px), 0 calc(100% - 14px)
+    );
+  }
+  .modal-box{
+    padding:24px 22px 22px;
+    text-align:center;
+  }
+  .modal-box.correct{background:var(--good-bg);}
+  .modal-box.incorrect{background:var(--bad-bg);}
+  .modal-title{
+    font-size:24px;
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  .modal-box.correct .modal-title{color:var(--good);}
+  .modal-box.incorrect .modal-title{color:var(--bad);}
+  .modal-answer{
+    font-size:26px;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:20px;
+  }
+  .modal-next-btn{
+    width:100%;
+    font-family:'VT323', monospace;
     font-size:22px;
     font-weight:700;
+    padding:13px 18px;
+    border:3px solid var(--leaf-dark);
+    cursor:pointer;
+    color:#fff;
+    background:var(--leaf);
+    clip-path: polygon(0 6px, 6px 6px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px));
   }
+  .modal-next-btn:active{background:var(--leaf-dark);}
+
   .hidden{display:none !important;}
 </style>
 </head>
@@ -301,21 +339,23 @@
       <div class="masked-word" id="maskedWord"></div>
     </div>
 
-    <div class="feedback" id="feedback">
-      <span id="feedbackTitle"></span>
-      <span class="answer hidden" id="feedbackAnswer"></span>
-    </div>
-
     <input type="text" id="answerInput" placeholder="Type the Italian word" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
 
     <button class="btn" id="checkBtn">Check</button>
-    <div class="btn-row">
-      <button class="btn" id="hintBtn">Hint</button>
-      <button class="btn" id="nextBtn">Next</button>
-    </div>
+    <button class="btn" id="hintBtn">Hint</button>
   </div>
 
 </div></div></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-frame">
+    <div class="modal-box" id="modalBox">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-answer" id="modalAnswer"></div>
+      <button class="modal-next-btn" id="modalNextBtn">Next ▶</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -369,12 +409,13 @@
   var articleTextEl = document.getElementById('articleText');
   var maskedWordEl = document.getElementById('maskedWord');
   var answerInput = document.getElementById('answerInput');
-  var feedback = document.getElementById('feedback');
-  var feedbackTitle = document.getElementById('feedbackTitle');
-  var feedbackAnswer = document.getElementById('feedbackAnswer');
+  var modalOverlay = document.getElementById('modalOverlay');
+  var modalBox = document.getElementById('modalBox');
+  var modalTitle = document.getElementById('modalTitle');
+  var modalAnswer = document.getElementById('modalAnswer');
+  var modalNextBtn = document.getElementById('modalNextBtn');
   var checkBtn = document.getElementById('checkBtn');
   var hintBtn = document.getElementById('hintBtn');
-  var nextBtn = document.getElementById('nextBtn');
 
   // ---------- Loading from Google Sheet ----------
   function loadFromSheet(){
@@ -680,8 +721,8 @@
     }
 
     answerInput.value = '';
-    feedback.classList.remove('show','correct','incorrect');
-    feedbackAnswer.classList.add('hidden');
+    modalOverlay.classList.remove('show');
+    modalBox.classList.remove('correct','incorrect');
     answerInput.disabled = false;
     answerInput.focus();
   }
@@ -737,18 +778,18 @@
     for(var i=0;i<state.revealed.length;i++) state.revealed[i] = true;
     maskedWordEl.textContent = maskString(currentTargetString(w), state.revealed);
 
-    feedback.classList.add('show');
-    feedbackAnswer.textContent = displayAnswer;
-    feedbackAnswer.classList.remove('hidden');
+    answerInput.disabled = true;
+    modalAnswer.textContent = displayAnswer;
+    modalBox.classList.remove('correct','incorrect');
     if(isCorrect){
-      feedback.classList.add('correct');
-      feedback.classList.remove('incorrect');
-      feedbackTitle.textContent = '✅ Correct';
+      modalBox.classList.add('correct');
+      modalTitle.textContent = '✅ Correct';
     } else {
-      feedback.classList.add('incorrect');
-      feedback.classList.remove('correct');
-      feedbackTitle.textContent = '❌ Correct answer';
+      modalBox.classList.add('incorrect');
+      modalTitle.textContent = '❌ Correct answer';
     }
+    modalOverlay.classList.add('show');
+    modalNextBtn.focus();
   }
 
   function giveHint(){
@@ -766,12 +807,18 @@
 
   checkBtn.addEventListener('click', checkAnswer);
   hintBtn.addEventListener('click', giveHint);
-  nextBtn.addEventListener('click', nextWord);
+  modalNextBtn.addEventListener('click', nextWord);
+
   answerInput.addEventListener('keydown', function(e){
     if(e.key === 'Enter'){
       e.preventDefault();
       if(!state.answered) checkAnswer();
-      else nextWord();
+    }
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && modalOverlay.classList.contains('show')){
+      e.preventDefault();
+      nextWord();
     }
   });
 
