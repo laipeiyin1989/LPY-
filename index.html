@@ -91,7 +91,20 @@
   .reload-row{
     display:flex;
     justify-content:center;
+    align-items:center;
+    gap:14px;
     margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .reset-link{
+    font-family:'VT323', monospace;
+    font-size:15px;
+    color:var(--ink-soft);
+    text-decoration:underline;
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:4px;
   }
   .reload-btn{
     font-family:'VT323', monospace;
@@ -310,6 +323,7 @@
 
   <div class="reload-row">
     <button class="reload-btn" id="reloadBtn">🔄 Reload List</button>
+    <button class="reset-link" id="resetProgressBtn">Reset progress</button>
   </div>
 
   <div class="error-msg" id="errorMsg"></div>
@@ -376,6 +390,7 @@
   // Box 0 = just missed, comes back soon. Box 4 = mastered, comes back much later.
   var GAPS = [4, 8, 15, 25, 40];
   var MASTER_BOX = GAPS.length - 1;
+  var PROGRESS_KEY = "italianTrainerProgress_v1";
 
   var settings = {
     reverse: false,
@@ -397,6 +412,7 @@
   var modeSelect = document.getElementById('modeSelect');
   var quizBody = document.getElementById('quizBody');
   var reloadBtn = document.getElementById('reloadBtn');
+  var resetProgressBtn = document.getElementById('resetProgressBtn');
   var modeNormalBtn = document.getElementById('modeNormalBtn');
   var modeReverseBtn = document.getElementById('modeReverseBtn');
   var modeBlindBtn = document.getElementById('modeBlindBtn');
@@ -446,7 +462,7 @@
           statusMsg.textContent = '';
           return;
         }
-        state.words = words;
+        state.words = applyProgress(words);
         statusMsg.classList.add('hidden');
         modeSelect.classList.add('show');
       })
@@ -457,6 +473,10 @@
   }
 
   reloadBtn.addEventListener('click', loadFromSheet);
+  resetProgressBtn.addEventListener('click', function(){
+    try{ localStorage.removeItem(PROGRESS_KEY); }catch(e){}
+    for(var i=0;i<state.words.length;i++){ state.words[i].box = 0; }
+  });
 
   function showError(msg){
     errorMsg.textContent = msg;
@@ -532,6 +552,47 @@
       return r.some(function(v){ return v && v.trim().length > 0; });
     });
     return rows;
+  }
+
+  // ---------- Progress persistence (localStorage) ----------
+  // Works once this page is actually deployed (e.g. GitHub Pages). Sandboxed
+  // previews (like inside a Claude.ai chat) may block localStorage entirely,
+  // so every call here is wrapped in try/catch and fails silently.
+  function wordKey(w){
+    return normalizeAnswer(w.full) + '||' + normalizeAnswer(w.english);
+  }
+
+  function loadProgress(){
+    try{
+      var raw = localStorage.getItem(PROGRESS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    }catch(e){
+      return {};
+    }
+  }
+
+  function saveProgress(){
+    try{
+      var map = {};
+      for(var i=0;i<state.words.length;i++){
+        var w = state.words[i];
+        if(w.box > 0) map[wordKey(w)] = w.box;
+      }
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(map));
+    }catch(e){
+      // localStorage unavailable (e.g. sandboxed preview) - just skip saving
+    }
+  }
+
+  function applyProgress(words){
+    var saved = loadProgress();
+    for(var i=0;i<words.length;i++){
+      var key = wordKey(words[i]);
+      if(saved.hasOwnProperty(key)){
+        words[i].box = saved[key];
+      }
+    }
+    return words;
   }
 
   function buildWordList(rows){
@@ -625,6 +686,7 @@
     var w = state.words[idx];
     if(correct === true){ w.box = Math.min(w.box + 1, MASTER_BOX); }
     else if(correct === false){ w.box = 0; }
+    if(correct === true || correct === false){ saveProgress(); }
     var baseGap = GAPS[Math.min(w.box, GAPS.length - 1)];
     // Jitter the gap by up to +/-30% so repeats don't land on a predictable rhythm.
     var jitter = Math.round(baseGap * (Math.random() * 0.6 - 0.3));
